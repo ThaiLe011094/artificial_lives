@@ -1,43 +1,84 @@
+import math
 import random
 import pygame
-from config import SCREEN_WIDTH, SCREEN_HEIGHT, RED, ORANGE
-
+# from config import ORANGE, SCREEN_WIDTH, SCREEN_HEIGHT
+import config
 
 class Predator:
-
-    def __init__(self, x, y, size=10, energy=200, speed=10):
+    def __init__(
+            self,
+            x,
+            y,
+            size=config.PREDATOR_SIZE,
+            energy=config.PREDATOR_BASE_ENERGY,
+            speed=config.PREDATOR_SPD,
+            starvation_threshold=config.PREDATOR_STARVATION_THRESHOLD):
         self.x = x
         self.y = y
         self.size = size
         self.energy = energy
         self.speed = speed
         self.alive = True
+        self.starvation_threshold = starvation_threshold
 
-    def move(self):
+    def move(self, organisms):
         if not self.alive:
             return
-        self.x += random.randint(-self.speed, self.speed)
-        self.y += random.randint(-self.speed, self.speed)
-        self.x = max(0, min(SCREEN_WIDTH, self.x))
-        self.y = max(0, min(SCREEN_HEIGHT, self.y))
-        self.energy -= 1
+
+        # If starving, move toward the nearest organism
+        if self.energy <= self.starvation_threshold:
+            closest_organism = self.find_closest_organism(organisms)
+            if closest_organism:
+                self.move_toward(closest_organism.x, closest_organism.y)
+        else:
+            # Free movement
+            self.x += random.randint(-self.speed, self.speed)
+            self.y += random.randint(-self.speed, self.speed)
+
+        # Keep within screen bounds
+        self.x = max(0, min(config.SCREEN_WIDTH, self.x))
+        self.y = max(0, min(config.SCREEN_HEIGHT, self.y))
+
+        # Decrease energy due to movement
+        self.energy -= config.PREDATOR_ENERGY_DEPLETE_RATE
         if self.energy <= 0:
             self.alive = False
+        print("predator:", self.energy)
+
+    def find_closest_organism(self, organisms):
+        closest_organism = None
+        min_distance = float('inf')
+        for organism in organisms:
+            if organism.alive:
+                distance = math.sqrt((self.x - organism.x) ** 2 + (self.y - organism.y) ** 2)
+                if distance < min_distance:
+                    closest_organism = organism
+                    min_distance = distance
+        return closest_organism
+
+    def move_toward(self, target_x, target_y):
+        dx = target_x - self.x
+        dy = target_y - self.y
+        distance = math.sqrt(dx ** 2 + dy ** 2)
+        if distance > 0:
+            self.x += self.speed * (dx / distance)
+            self.y += self.speed * (dy / distance)
 
     def hunt(self, organisms):
+        if not self.alive:
+            return
         for organism in organisms:
-            if organism.alive and abs(self.x - organism.x) < self.size and abs(
-                    self.y - organism.y) < self.size:
+            distance = math.sqrt((self.x - organism.x) ** 2 + (self.y - organism.y) ** 2)
+            if distance < self.size and self.energy <= self.starvation_threshold:
                 organism.alive = False
-                self.energy += 50
-                self.size += 1
+                self.energy += random.randint(40, 80)
 
     def render(self, surface):
         if self.alive:
-            pygame.draw.circle(surface, ORANGE, (self.x, self.y), self.size)
+            pygame.draw.circle(surface, config.ORANGE, (int(self.x), int(self.y)), self.size)
 
     @staticmethod
     def random():
-        x = random.randint(0, SCREEN_WIDTH)
-        y = random.randint(0, SCREEN_HEIGHT)
+        x = random.randint(0, config.SCREEN_WIDTH)
+        y = random.randint(0, config.SCREEN_HEIGHT)
         return Predator(x, y)
