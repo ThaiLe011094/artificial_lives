@@ -2,7 +2,9 @@ import random
 import pygame
 from config import SCREEN_WIDTH, SCREEN_HEIGHT, RED
 
+
 class Food:
+
     def __init__(self, x, y):
         self.x = x
         self.y = y

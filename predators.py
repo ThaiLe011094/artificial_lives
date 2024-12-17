@@ -2,7 +2,9 @@ import random
 import pygame
 from config import SCREEN_WIDTH, SCREEN_HEIGHT, RED, ORANGE
 
+
 class Predator:
+
     def __init__(self, x, y, size=10, energy=200, speed=10):
         self.x = x
         self.y = y
@@ -24,7 +26,8 @@ class Predator:
 
     def hunt(self, organisms):
         for organism in organisms:
-            if organism.alive and abs(self.x - organism.x) < self.size and abs(self.y - organism.y) < self.size:
+            if organism.alive and abs(self.x - organism.x) < self.size and abs(
+                    self.y - organism.y) < self.size:
                 organism.alive = False
                 self.energy += 50
                 self.size += 1

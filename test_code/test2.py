@@ -20,7 +20,9 @@ BLUE = (0, 0, 255)
 # Clock
 clock = pygame.time.Clock()
 
+
 class Organism:
+
     def __init__(self, x, y, size=5, energy=100, age=0):
         self.x = x
         self.y = y
@@ -54,7 +56,9 @@ class Organism:
         if self.alive:
             pygame.draw.circle(surface, GREEN, (self.x, self.y), self.size)
 
+
 class Food:
+
     def __init__(self, x, y):
         self.x = x
         self.y = y
@@ -64,14 +68,21 @@ class Food:
         if self.alive:
             pygame.draw.circle(surface, RED, (self.x, self.y), 3)
 
-# Initialize organisms and food
-MAX_ORGAN_SIZE_W = int(SCREEN_WIDTH/100)
-MAX_ORGAN_SIZE_H = int(SCREEN_HEIGHT/100)
-organisms = [Organism(random.randint(0, MAX_ORGAN_SIZE_W), random.randint(0, MAX_ORGAN_SIZE_H)) for _ in range(20)]
 
-MAX_FOOD_SIZE_W = int(SCREEN_WIDTH/100)
-MAX_FOOD_SIZE_H = int(SCREEN_HEIGHT/100)
-food_items = [Food(random.randint(0, MAX_FOOD_SIZE_W), random.randint(0, MAX_FOOD_SIZE_H)) for _ in range(50)]
+# Initialize organisms and food
+MAX_ORGAN_SIZE_W = int(SCREEN_WIDTH / 100)
+MAX_ORGAN_SIZE_H = int(SCREEN_HEIGHT / 100)
+organisms = [
+    Organism(random.randint(0, MAX_ORGAN_SIZE_W),
+             random.randint(0, MAX_ORGAN_SIZE_H)) for _ in range(20)
+]
+
+MAX_FOOD_SIZE_W = int(SCREEN_WIDTH / 100)
+MAX_FOOD_SIZE_H = int(SCREEN_HEIGHT / 100)
+food_items = [
+    Food(random.randint(0, MAX_FOOD_SIZE_W),
+         random.randint(0, MAX_FOOD_SIZE_H)) for _ in range(50)
+]
 
 # Main loop
 running = True
@@ -95,7 +106,10 @@ while running:
 
     # Respawn food if all are eaten
     if not any(food.alive for food in food_items):
-        food_items = [Food(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT)) for _ in range(50)]
+        food_items = [
+            Food(random.randint(0, SCREEN_WIDTH),
+                 random.randint(0, SCREEN_HEIGHT)) for _ in range(50)
+        ]
 
     pygame.display.flip()
     clock.tick(30)

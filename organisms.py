@@ -2,8 +2,17 @@ import random
 import pygame
 from config import SCREEN_WIDTH, SCREEN_HEIGHT, GREEN, BLUE
 
+
 class Organism:
-    def __init__(self, x, y, size=5, energy=100, age=0, max_age=None, color=GREEN):
+
+    def __init__(self,
+                 x,
+                 y,
+                 size=5,
+                 energy=100,
+                 age=0,
+                 max_age=None,
+                 color=GREEN):
         self.x = x
         self.y = y
         self.size = size
@@ -26,13 +35,16 @@ class Organism:
             self.alive = False
 
     def eat(self, food):
-        if food.alive and abs(self.x - food.x) < self.size and abs(self.y - food.y) < self.size:
+        if food.alive and abs(self.x -
+                              food.x) < self.size and abs(self.y -
+                                                          food.y) < self.size:
             self.energy += 20
             food.alive = False
             self.size += 1
 
     def mate(self, other):
-        if self.alive and other.alive and abs(self.x - other.x) < 20 and abs(self.y - other.y) < 20:
+        if self.alive and other.alive and abs(self.x - other.x) < 20 and abs(
+                self.y - other.y) < 20:
             if self.energy > 50 and other.energy > 50:
                 self.energy -= 25
                 other.energy -= 25
@@ -50,7 +62,8 @@ class Organism:
 
     def render(self, surface):
         if self.alive:
-            pygame.draw.circle(surface, self.color, (self.x, self.y), self.size)
+            pygame.draw.circle(surface, self.color, (self.x, self.y),
+                               self.size)
 
     @staticmethod
     def random():

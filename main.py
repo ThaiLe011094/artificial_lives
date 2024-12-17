@@ -44,7 +44,7 @@ def main():
             organism.move()
             for food in food_items:
                 organism.eat(food)
-            for other in organisms[i+1:]:
+            for other in organisms[i + 1:]:
                 new_organisms.extend(organism.mate(other))
             organism.render(screen)
 
@@ -75,6 +75,7 @@ def main():
         clock.tick(1)
 
     pygame.quit()
+
 
 if __name__ == "__main__":
     main()
