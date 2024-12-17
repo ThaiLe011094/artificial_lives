@@ -1,0 +1,12 @@
+# Screen dimensions
+SCREEN_WIDTH = 1920
+SCREEN_HEIGHT = 1080
+
+# Colors
+BLACK = (0, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
+RED = (255, 0, 0)
+GRAY = (128, 128, 128)
+LIGHT_BLUE = (173, 216, 230)
+ORANGE = (255, 165, 0)
