@@ -3,6 +3,8 @@ import math
 import pygame
 # from config import GREEN, SCREEN_WIDTH, SCREEN_HEIGHT
 import config
+import string
+from typing import Final
 
 class Organism:
     def __init__(
@@ -19,11 +21,14 @@ class Organism:
         self.y = y
         self.size = size
         self.energy = energy
-        self.speed = speed
+        self.speed: Final[int] = speed  # Check constant, only works when checking using mypy
         self.alive = True
         self.starvation_threshold = starvation_threshold
         self.color = color
         self.mating_cooldown = 0  # Time until this organism can mate again
+        self.name = ''.join(random.SystemRandom().choice(
+            string.ascii_uppercase + string.digits)
+            for _ in range(config.NUMBER_OF_NAME_CHAR))
 
     def move(self, food_items):
         if not self.alive:
@@ -37,10 +42,16 @@ class Organism:
         else:
             # Free movement
             try:
-                self.x += random.randint(-self.speed, self.speed)
-                self.y += random.randint(-self.speed, self.speed)
-            except ValueError:
-                print("self.speed:", self.speed)
+                # self.x += random.randint(-self.speed, self.speed)
+                # self.y += random.randint(-self.speed, self.speed)
+                self.x += random.randint(-3, 3)
+                self.y += random.randint(-3, 3)
+            # except ValueError:
+            #     self.speed = config.ORGANISM_SPD
+            #     self.x += random.randint(-self.speed, self.speed)
+            #     self.y += random.randint(-self.speed, self.speed)
+            except Exception:
+                raise Exception(f"self.speed: {self.speed}")
 
         # Keep within screen bounds
         self.x = max(0, min(config.SCREEN_WIDTH, self.x))
@@ -50,7 +61,7 @@ class Organism:
         self.energy -= config.ORGANISM_ENERGY_DEPLETE_RATE
         if self.energy <= 0:
             self.alive = False
-        print("organism:", self.energy)
+        print(f"organism {self.name}:", self.energy)
 
     def find_closest_food(self, food_items):
         closest_food = None

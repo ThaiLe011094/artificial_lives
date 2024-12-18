@@ -3,6 +3,7 @@ import random
 import pygame
 # from config import ORANGE, SCREEN_WIDTH, SCREEN_HEIGHT
 import config
+import string
 
 class Predator:
     def __init__(
@@ -20,6 +21,9 @@ class Predator:
         self.speed = speed
         self.alive = True
         self.starvation_threshold = starvation_threshold
+        self.name = ''.join(random.SystemRandom().choice(
+            string.ascii_uppercase + string.digits)
+            for _ in range(config.NUMBER_OF_NAME_CHAR))
 
     def move(self, organisms):
         if not self.alive:
@@ -43,7 +47,7 @@ class Predator:
         self.energy -= config.PREDATOR_ENERGY_DEPLETE_RATE
         if self.energy <= 0:
             self.alive = False
-        print("predator:", self.energy)
+        print(f"predator {self.name}:", self.energy)
 
     def find_closest_organism(self, organisms):
         closest_organism = None
