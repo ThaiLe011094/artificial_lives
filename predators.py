@@ -77,9 +77,12 @@ class Predator:
                 organism.alive = False
                 self.energy += random.randint(40, 80)
 
-    def render(self, surface):
+    def render(self, screen):
         if self.alive:
-            pygame.draw.circle(surface, config.ORANGE, (int(self.x), int(self.y)), self.size)
+            pygame.draw.circle(screen, config.ORANGE, (int(self.x), int(self.y)), self.size)
+            font = pygame.font.SysFont(None, 24)
+            text = font.render(f'{self.name} ({int(self.energy)})', True, (255, 255, 255))
+            screen.blit(text, (self.x - self.size, self.y - self.size - 20))
 
     @staticmethod
     def random():

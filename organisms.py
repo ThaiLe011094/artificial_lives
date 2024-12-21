@@ -34,34 +34,39 @@ class Organism:
         if not self.alive:
             return
 
+        print(f"Moving organism {self.name} at position ({self.x}, {self.y}) with energy {self.energy}")
+
         # If starving, move toward the nearest food
         if self.energy <= self.starvation_threshold:
             closest_food = self.find_closest_food(food_items)
             if closest_food:
+                print(f"Organism {self.name} is starving and moving towards food at ({closest_food.x}, {closest_food.y})")
                 self.move_toward(closest_food.x, closest_food.y)
         else:
             # Free movement
             try:
-                # self.x += random.randint(-self.speed, self.speed)
-                # self.y += random.randint(-self.speed, self.speed)
-                self.x += random.randint(-3, 3)
-                self.y += random.randint(-3, 3)
-            # except ValueError:
-            #     self.speed = config.ORGANISM_SPD
-            #     self.x += random.randint(-self.speed, self.speed)
-            #     self.y += random.randint(-self.speed, self.speed)
-            except Exception:
+                dx = random.randint(-self.speed, self.speed)
+                dy = random.randint(-self.speed, self.speed)
+                self.x += dx
+                self.y += dy
+                print(f"Organism {self.name} moved freely by ({dx}, {dy}) to ({self.x}, {self.y})")
+            except Exception as e:
+                print(f"Exception occurred for organism {self.name}: {e}")
                 raise Exception(f"self.speed: {self.speed}")
 
         # Keep within screen bounds
         self.x = max(0, min(config.SCREEN_WIDTH, self.x))
         self.y = max(0, min(config.SCREEN_HEIGHT, self.y))
+        print(f"Organism {self.name} position adjusted to screen bounds: ({self.x}, {self.y})")
 
         # Decrease energy due to movement
-        self.energy -= config.ORGANISM_ENERGY_DEPLETE_RATE
+        self.energy -= 1
+        print(f"Organism {self.name} energy decreased to {self.energy}")
+
         if self.energy <= 0:
             self.alive = False
-        print(f"organism {self.name}:", self.energy)
+            print(f"Organism {self.name} has died due to lack of energy")
+
 
     def find_closest_food(self, food_items):
         closest_food = None
@@ -88,11 +93,14 @@ class Organism:
         distance = math.sqrt((self.x - food.x) ** 2 + (self.y - food.y) ** 2)
         if distance < self.size and self.energy <= self.starvation_threshold:
             food.alive = False
-            self.energy += random.randint(20, 40)
+            self.energy += random.randint(40, 80)
 
-    def render(self, surface):
+    def render(self, screen):
         if self.alive:
-            pygame.draw.circle(surface, config.GREEN, (int(self.x), int(self.y)), self.size)
+            pygame.draw.circle(screen, self.color, (self.x, self.y), self.size)
+            font = pygame.font.SysFont(None, 24)
+            text = font.render(f'{self.name} ({int(self.energy)})', True, (255, 255, 255))
+            screen.blit(text, (self.x - self.size, self.y - self.size - 20))
 
     @staticmethod
     def random():
