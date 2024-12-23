@@ -95,6 +95,11 @@ class Organism:
             food.alive = False
             self.energy += random.randint(40, 80)
 
+    def get_hitbox(self):
+        return pygame.Rect(
+            self.x - self.size, self.y - self.size,
+            config.ORGANISM_HITBOX_RADIUS, config.ORGANISM_HITBOX_RADIUS)
+
     def render(self, screen):
         if self.alive:
             pygame.draw.circle(screen, self.color, (self.x, self.y), self.size)

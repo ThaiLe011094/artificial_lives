@@ -77,6 +77,11 @@ class Predator:
                 organism.alive = False
                 self.energy += random.randint(40, 80)
 
+    def get_hitbox(self):
+        return pygame.Rect(
+            self.x - self.size, self.y - self.size,
+            config.PREDATOR_HITBOX_RADIUS, config.PREDATOR_HITBOX_RADIUS)
+
     def render(self, screen):
         if self.alive:
             pygame.draw.circle(screen, config.ORANGE, (int(self.x), int(self.y)), self.size)
