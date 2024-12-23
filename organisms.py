@@ -29,6 +29,11 @@ class Organism:
         self.name = ''.join(random.SystemRandom().choice(
             string.ascii_uppercase + string.digits)
             for _ in range(config.NUMBER_OF_NAME_CHAR))
+        # Randomly choose between two images
+        image_path = random.choice(config.ORGANSIM_IMG_PATH)
+        self.image = pygame.image.load(image_path)
+        self.avatar = pygame.transform.scale(self.image, config.ORGANISM_IMG_SIZE)
+        self.previous_x = x  # Store the previous x position
 
     def move(self, food_items):
         if not self.alive:
@@ -84,6 +89,7 @@ class Organism:
         dy = target_y - self.y
         distance = math.sqrt(dx ** 2 + dy ** 2)
         if distance > 0:
+            self.previous_x = self.x  # Update previous x position
             self.x += self.speed * (dx / distance)
             self.y += self.speed * (dy / distance)
 
@@ -102,7 +108,14 @@ class Organism:
 
     def render(self, screen):
         if self.alive:
-            pygame.draw.circle(screen, self.color, (self.x, self.y), self.size)
+            # Determine if the image should be flipped
+            if self.x > self.previous_x:
+                directed_avatar = pygame.transform.flip(self.avatar, True, False)
+            else:
+                directed_avatar = self.avatar
+
+            # pygame.draw.circle(screen, self.color, (self.x, self.y), self.size)  # circle as avatar
+            screen.blit(directed_avatar, (self.x - self.size, self.y - self.size))
             font = pygame.font.SysFont(None, 24)
             text = font.render(f'{self.name} ({int(self.energy)})', True, (255, 255, 255))
             screen.blit(text, (self.x - self.size, self.y - self.size - 20))
