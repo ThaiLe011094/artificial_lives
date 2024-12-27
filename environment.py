@@ -1,6 +1,7 @@
 import pygame
 from config import SCREEN_WIDTH, SCREEN_HEIGHT, GRAY, LIGHT_BLUE
 import random
+import numpy as np
 
 
 class Obstacle:
@@ -43,3 +44,47 @@ class Weather:
         if self.type == "rain":
             pygame.draw.rect(surface, LIGHT_BLUE,
                              (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT), 10)
+
+
+class Environment:
+    def __init__(self, organisms, predators, food_items):
+        self.organisms = organisms
+        self.predators = predators
+        self.food_items = food_items
+
+    def get_state(self, organism):
+        closest_food = organism.find_closest_food(self.food_items, self.predators)
+        closest_predator = organism.find_closest_predator(self.predators)
+        state = [
+            organism.x, organism.y, 
+            organism.energy,
+            closest_food.x if closest_food else 0,
+            closest_food.y if closest_food else 0,
+            closest_predator.x if closest_predator else 0,
+            closest_predator.y if closest_predator else 0
+        ]
+        return np.array(state)
+
+    def step(self, organism, action):
+        # Define actions: 0 = up, 1 = down, 2 = left, 3 = right
+        if action == 0:
+            organism.y -= organism.speed
+        elif action == 1:
+            organism.y += organism.speed
+        elif action == 2:
+            organism.x -= organism.speed
+        elif action == 3:
+            organism.x += organism.speed
+
+        # Calculate reward
+        reward = -1  # Default reward for each step
+        if organism.energy <= 0:
+            reward -= 100  # Penalty for dying
+        closest_food = organism.find_closest_food(self.food_items, self.predators)
+        if closest_food and organism.x == closest_food.x and organism.y == closest_food.y:
+            reward += 100  # Reward for finding food
+
+        # Update state
+        new_state = self.get_state(organism)
+        done = not organism.alive
+        return new_state, reward, done
