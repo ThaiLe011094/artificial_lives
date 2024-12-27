@@ -57,7 +57,7 @@ def main():
         organisms = [o for o in organisms if o.alive]
         for organism in organisms:
             if not dragging or organism != selected_entity:
-                organism.move(food_items)
+                organism.move(food_items, predators)
             for food in food_items:
                 organism.eat(food)
             organism.render(screen)

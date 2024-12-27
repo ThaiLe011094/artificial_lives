@@ -35,14 +35,19 @@ class Organism:
         self.avatar = pygame.transform.scale(self.image, config.ORGANISM_IMG_SIZE)
         self.previous_x = x  # Store the previous x position
 
-    def move(self, food_items):
+    def move(self, food_items, predators):
         if not self.alive:
             return
 
         print(f"Moving organism {self.name} at position ({self.x}, {self.y}) with energy {self.energy}")
 
+        # Check for nearby predators
+        closest_predator = self.find_closest_predator(predators)
+        if closest_predator and self.is_predator_in_field_of_view(closest_predator):
+            print(f"Organism {self.name} is running away from predator at ({closest_predator.x}, {closest_predator.y})")
+            self.run_away_from(closest_predator.x, closest_predator.y)
         # If starving, move toward the nearest food
-        if self.energy <= self.starvation_threshold:
+        elif self.energy <= self.starvation_threshold:
             closest_food = self.find_closest_food(food_items)
             if closest_food:
                 print(f"Organism {self.name} is starving and moving towards food at ({closest_food.x}, {closest_food.y})")
@@ -65,7 +70,7 @@ class Organism:
         print(f"Organism {self.name} position adjusted to screen bounds: ({self.x}, {self.y})")
 
         # Decrease energy due to movement
-        self.energy -= 1
+        self.energy -= config.ORGANISM_ENERGY_DEPLETE_RATE
         print(f"Organism {self.name} energy decreased to {self.energy}")
 
         if self.energy <= 0:
@@ -105,6 +110,30 @@ class Organism:
         return pygame.Rect(
             self.x - self.size, self.y - self.size,
             config.ORGANISM_HITBOX_RADIUS, config.ORGANISM_HITBOX_RADIUS)
+
+    def find_closest_predator(self, predators):
+        closest_predator = None
+        min_distance = float('inf')
+        for predator in predators:
+            if predator.alive:
+                distance = math.sqrt((self.x - predator.x) ** 2 + (self.y - predator.y) ** 2)
+                if distance < min_distance:
+                    closest_predator = predator
+                    min_distance = distance
+        return closest_predator
+
+    def is_predator_in_field_of_view(self, predator):
+        distance = math.sqrt((self.x - predator.x) ** 2 + (self.y - predator.y) ** 2)
+        return distance <= config.ORGANISM_FIELD_OF_VIEW
+
+    def run_away_from(self, predator_x, predator_y):
+        dx = self.x - predator_x
+        dy = self.y - predator_y
+        distance = math.sqrt(dx ** 2 + dy ** 2)
+        if distance > 0:
+            self.previous_x = self.x  # Update previous x position
+            self.x += self.speed * (dx / distance)
+            self.y += self.speed * (dy / distance)
 
     def render(self, screen):
         if self.alive:
