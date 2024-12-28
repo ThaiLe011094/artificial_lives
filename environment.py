@@ -79,10 +79,10 @@ class Environment:
         # Calculate reward
         reward = -1  # Default reward for each step
         if organism.energy <= 0:
-            reward -= 100  # Penalty for dying
+            reward -= 40  # Penalty for dying
         closest_food = organism.find_closest_food(self.food_items, self.predators)
         if closest_food and organism.x == closest_food.x and organism.y == closest_food.y:
-            reward += 100  # Reward for finding food
+            reward += 40  # Reward for finding food
 
         # Update state
         new_state = self.get_state(organism)
