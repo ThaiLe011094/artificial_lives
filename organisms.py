@@ -166,6 +166,14 @@ class Organism:
                     min_distance = distance
         return closest_food
 
+    def distance_to(self, food):
+        """
+        Calculate the distance from the organism to a food item.
+        """
+        dx = self.x - food.x
+        dy = self.y - food.y
+        return math.sqrt(dx**2 + dy**2)
+
     def move_toward(self, target_x, target_y):
         dx = target_x - self.x
         dy = target_y - self.y
