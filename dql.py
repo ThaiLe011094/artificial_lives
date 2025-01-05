@@ -11,6 +11,7 @@ from keras._tf_keras.keras.layers import Dense
 # from keras.optimizers import Adam
 # from tensorflow.python.keras.optimizer_v2 import adam  # *
 from keras._tf_keras.keras.optimizers import Adam
+import config
 
 
 class DQLAgent:
@@ -44,8 +45,19 @@ class DQLAgent:
         act_values = self.model.predict(state)
         return np.argmax(act_values[0])
 
-    def replay(self, batch_size):
-        minibatch = random.sample(self.memory, batch_size)
+    # def replay(self, batch_size):
+    #     minibatch = random.sample(self.memory, batch_size)
+    #     for state, action, reward, next_state, done in minibatch:
+    #         target = reward
+    #         if not done:
+    #             target = (reward + self.gamma *
+    #                       np.amax(self.model.predict(next_state)[0]))
+    #         target_f = self.model.predict(state)
+    #         target_f[0][action] = target
+    #         self.model.fit(state, target_f, epochs=1, verbose=0)
+    #     if self.epsilon > self.epsilon_min:
+    #         self.epsilon *= self.epsilon_decay
+    def replay(self, minibatch):
         for state, action, reward, next_state, done in minibatch:
             target = reward
             if not done:
@@ -56,6 +68,12 @@ class DQLAgent:
             self.model.fit(state, target_f, epochs=1, verbose=0)
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
+
+    def train(self, experience_replay):
+        if len(experience_replay) >= config.MIN_REPLAY_SIZE:
+            minibatch = random.sample(experience_replay, config.BATCH_SIZE)
+            self.replay(minibatch)
+            self.save(config.MODEL_PATH)  # Save the updated model
 
     def save(self, name):
         self.model.save(name, save_format='h5')

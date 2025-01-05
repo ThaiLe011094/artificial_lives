@@ -22,50 +22,51 @@ batch_size = 128
 pygame.init()
 screen = pygame.display.set_mode((config.SCREEN_WIDTH, config.SCREEN_HEIGHT))
 
-for e in range(episodes):
-    for organism in organisms:
-        state = env.get_state(organism)
-        state = np.reshape(state, [1, state_size])
-        for time in range(500):
-            action = agent.act(state)
-            next_state, reward, done = env.step(organism, action)
-            
-            # Calculate reward based on distance to the closest food
-            closest_food_distance = min([organism.distance_to(food) for food in food_items])
-            reward = 10 / (closest_food_distance + 1)  # Higher reward for closer food
-            if closest_food_distance < organism.size:
-                reward += 50  # Extra reward for reaching the closest food
-            reward = reward if not done else -10
-            
-            next_state = np.reshape(next_state, [1, state_size])
-            agent.remember(state, action, reward, next_state, done)
-            state = next_state
-            
-            # Organism movement and interaction
-            if organism.alive:
-                organism.move(food_items, predators)
+try:
+    for e in range(episodes):
+        for organism in organisms:
+            state = env.get_state(organism)
+            state = np.reshape(state, [1, state_size])
+            for time in range(500):
+                action = agent.act(state)
+                next_state, reward, done = env.step(organism, action)
+                
+                # Calculate reward based on distance to the closest food
+                closest_food_distance = min([organism.distance_to(food) for food in food_items])
+                reward = 10 / (closest_food_distance + 1)  # Higher reward for closer food
+                if closest_food_distance < organism.size:
+                    reward += 50  # Extra reward for reaching the closest food
+                reward = reward if not done else -10
+                
+                next_state = np.reshape(next_state, [1, state_size])
+                agent.remember(state, action, reward, next_state, done)
+                state = next_state
+                
+                # Organism movement and interaction
+                if organism.alive:
+                    organism.move(food_items, predators)
+                    for food in food_items:
+                        organism.eat(food)
+                    organism.render(screen)
+                
+                # Render the environment
+                screen.fill((0, 0, 0))  # Clear the screen with black
+                for organism in organisms:
+                    organism.render(screen)
+
+                # Render food
                 for food in food_items:
-                    organism.eat(food)
-                organism.render(screen)
-            
-            # Render the environment
-            screen.fill((0, 0, 0))  # Clear the screen with black
-            for organism in organisms:
-                organism.render(screen)
+                    food.render(screen)
+                pygame.display.flip()  # Update the full display surface to the screen
 
-            # Render food
-            for food in food_items:
-                food.render(screen)
-            pygame.display.flip()  # Update the full display surface to the screen
-
-            if done:
-                print(f"episode: {e}/{episodes}, score: {time}, e: {agent.epsilon:.2}")
-                break
-            if len(agent.memory) > batch_size:
-                agent.replay(batch_size)
-
-# Save the trained model
-agent.save("dql_model.h5")
+                if done:
+                    print(f"episode: {e}/{episodes}, score: {time}, e: {agent.epsilon:.2}")
+                    break
+                if len(agent.memory) > batch_size:
+                    agent.replay(batch_size)
+# Save the trained model even if the training is interrupted
+finally:
+    agent.save(config.MODEL_PATH)
 
 # Quit rendering
 pygame.quit()

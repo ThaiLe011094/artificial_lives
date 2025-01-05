@@ -42,10 +42,13 @@ class Organism:
         state_size = 7
         action_size = 4
         self.agent = DQLAgent(state_size, action_size)
-        model_path = "dql_model.h5"
-        if os.path.exists(model_path):
-            self.agent.load(model_path)   # Load the trained model
+        if os.path.exists(config.MODEL_PATH):
+            self.agent.load(config.MODEL_PATH)   # Load the trained model
 
+        self.experience_replay = []  # Initialize experience replay buffer
+
+    """  # Commented out - Old implementation with basic a.i
+    {
     # def move(self, food_items, predators):
     #     if not self.alive:
     #         return
@@ -118,19 +121,52 @@ class Organism:
     #                 min_distance = distance
     #     return closest_food
 
-    def move(self, food_items, predators):  # integrate deep q-learning
+    # def move(self, food_items, predators):  # integrate deep q-learning
+        # if not self.alive:
+        #     return
+
+        # state = self.get_state(food_items, predators)
+        # state = np.reshape(state, [1, self.agent.state_size])
+        # action = self.agent.act(state)
+        # self.perform_action(action)
+
+        # self.keep_within_bounds()
+        # self.energy -= config.ORGANISM_ENERGY_DEPLETE_RATE
+        # if self.energy <= 0:
+        #     self.alive = False
+    }
+    """
+
+    def collect_experience(self, state, action, reward, next_state, done):
+        self.experience_replay.append((state, action, reward, next_state, done))
+        if len(self.experience_replay) > config.REPLAY_BUFFER_SIZE:
+            self.experience_replay.pop(0)
+
+    # def train_agent(self):
+    #     if len(self.experience_replay) >= config.MIN_REPLAY_SIZE:
+    #         minibatch = random.sample(self.experience_replay, config.BATCH_SIZE)
+    #         self.agent.train(minibatch)
+    #         self.agent.save(config.MODEL_PATH)  # Save the updated model
+
+    def move(self, food_items, predators):
         if not self.alive:
             return
 
+        # Collect the current state
         state = self.get_state(food_items, predators)
-        state = np.reshape(state, [1, self.agent.state_size])
-        action = self.agent.act(state)
-        self.perform_action(action)
 
-        self.keep_within_bounds()
-        self.energy -= config.ORGANISM_ENERGY_DEPLETE_RATE
-        if self.energy <= 0:
-            self.alive = False
+        # Choose an action
+        action = self.agent.act(state)
+
+        # Perform the action and collect the reward
+        reward, next_state, done = self.perform_action(action, food_items, predators)
+
+        # Collect experience
+        self.collect_experience(state, action, reward, next_state, done)
+
+        # Periodically train the agent
+        if len(self.experience_replay) % config.TRAINING_INTERVAL == 0:
+            self.agent.train(self.experience_replay)
 
     def get_state(self, food_items, predators):
         closest_food = self.find_closest_food(food_items, predators)
@@ -145,7 +181,7 @@ class Organism:
         ]
         return np.array(state)
 
-    def perform_action(self, action):
+    def perform_action(self, action, food_items, predators):
         if action == 0:
             self.y -= self.speed
         elif action == 1:
@@ -154,6 +190,41 @@ class Organism:
             self.x -= self.speed
         elif action == 3:
             self.x += self.speed
+
+        # Keep within screen bounds
+        self.x = max(0, min(config.SCREEN_WIDTH, self.x))
+        self.y = max(0, min(config.SCREEN_HEIGHT, self.y))
+
+        # Decrease energy due to movement
+        self.energy -= config.ORGANISM_ENERGY_DEPLETE_RATE
+
+        # Check for collisions with food
+        reward = 0
+        for food in food_items:
+            if self.x == food.x and self.y == food.y:
+                reward += config.FOOD_REWARD
+                self.energy += config.FOOD_ENERGY
+                food_items.remove(food)
+                break
+
+        # Check for collisions with predators
+        done = False
+        for predator in predators:
+            if self.x == predator.x and self.y == predator.y:
+                reward -= config.PREDATOR_PENALTY
+                self.alive = False
+                done = True
+                break
+
+        # Check if the organism has died due to lack of energy
+        if self.energy <= 0:
+            self.alive = False
+            done = True
+
+        # Collect the next state
+        next_state = self.get_state(food_items, predators)
+
+        return reward, next_state, done 
 
     def find_closest_food(self, food_items, predators):
         closest_food = None

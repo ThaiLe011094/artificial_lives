@@ -1,3 +1,7 @@
+# Description: This file contains all the configurations for the game.
+# Model info
+MODEL_PATH = 'models/dql_model.h5'
+
 # Screen configs
 SCREEN_WIDTH = 1920
 SCREEN_HEIGHT = 1080
@@ -15,6 +19,10 @@ ORANGE = (255, 165, 0)
 # Other configs
 NUMBER_OF_NAME_CHAR = 6
 NUMBER_OF_OBSTACLES = 5
+REPLAY_BUFFER_SIZE = 1000
+MIN_REPLAY_SIZE = 100
+BATCH_SIZE = 32
+TRAINING_INTERVAL = 1
 
 # Predator
 PREDATOR_POPULATION = 1
@@ -27,6 +35,7 @@ PREDATOR_AGE = 2000
 PREDATOR_HITBOX_RADIUS = PREDATOR_SIZE * 8
 PREDATOR_IMG_PATH = ['resources/avatars/predator.png']
 PREDATOR_IMG_SIZE = (80, 80)
+PREDATOR_PENALTY = 1
 
 # Organism
 ORGANSIM_POPULATION = 10
@@ -43,3 +52,5 @@ ORGANISM_FIELD_OF_VIEW = 300
 
 # Organsim Food
 ORGANSIM_FOOD = 500
+FOOD_REWARD = 1
+FOOD_ENERGY = 50
